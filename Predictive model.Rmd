@@ -1,0 +1,111 @@
+---
+title: "Predictive model"
+output: html_document
+---
+
+```{r setup, include=FALSE, warning=FALSE, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(forecast)
+library(tidyr)
+library(tidyselect)
+library(tidyverse)
+library(mosaic)
+library(MASS)
+library(gains)
+library(dplyr)
+library(lmtest)
+library(readr)
+library(FNN)
+library(kableExtra)
+library(effects)
+library(caret)
+df<-readr::read_csv('AdviseInvestData.csv')
+```
+
+## **1. Building logistic regression model**
+
+```{r, message=FALSE, warning=FALSE}
+# Converting some variables into factors
+df$FEMALE<-factor(df$FEMALE, levels = c(0,1), labels=c("Female", "Male"))
+df$JOB<-factor(df$JOB, levels=c(0,1,2,3), labels = c("unemployed", "entry", "middle", "managment"))
+df$RENT<-as.factor(df$RENT)
+df$OWN_RES<-as.factor(df$OWN_RES)
+df$NEW_CAR<-as.factor(df$NEW_CAR)
+df$CHK_ACCT<-factor(df$CHK_ACCT, levels=c(0,1,2,3), labels = c("No", "< $200", "$200-$2000", ">$2000"))
+df$SAV_ACCT<-as.factor(df$SAV_ACCT)
+df$MOBILE<-as.factor(df$MOBILE)
+```
+
+```{r, message=FALSE, warning=FALSE}
+# Partioning data into training and validation data
+set.seed(101)
+train.index<-sample(c(1:dim(df)[1]), dim(df)[1]*0.6)
+valid.index<-setdiff(c(1:dim(df)[1]), train.index)
+df.train<-df[train.index,]
+df.valid<-df[valid.index,]
+```
+
+## **Running logistic regression model on training data**
+
+```{r}
+# variables: variables: income, female, age, num_dependents, rent, chk_accts, num_accts, mobile
+mod1<-glm(ANSWERED ~ INCOME+FEMALE+AGE+NUM_DEPENDENTS+RENT+CHK_ACCT+NUM_ACCTS+MOBILE, data=df.train, family = "binomial")
+summary(mod1)
+```
+```{r}
+mod1.pred<-predict(mod1, df.valid, type="response")
+confusionMatrix(factor(ifelse(mod1.pred>0.5,1,0)), factor(df.valid$ANSWERED))
+```
+
+**Lift chart**
+```{r, warning=FALSE, message=FALSE}
+gain<-gains(df.valid$ANSWERED, mod1.pred, groups=length(mod1.pred))
+plot(c(0, gain$cume.pct.of.total*sum(df.valid$ANSWERED))~c(0, gain$cume.obs), xlab="case", ylab="Cumulative", main=" ", type="l")
+lines(c(0, sum(df.valid$ANSWERED))~c(0,dim(df.valid)[1]), lty=2)
+```
+
+**decile chart**
+```{r, message=FALSE, warning=FALSE}
+decile.data<-data.frame("actual" = df.valid$ANSWERED, "probability" = mod1.pred)
+gain.mod1<-gains(decile.data$actual, decile.data$probability)
+midpoints.mod1 <-barplot(gain.mod1$mean.resp/mean(decile.data$actual), names.arg= gain.mod1$depth, ylim = c(0,3),
+xlab = "Percentile", ylab = "Mean Answer Phone", main = "Figure: Decile-wise lift chart")
+text(midpoints.mod1, gain.mod1$mean.resp/mean(decile.data$actual)+0.5, labels=round(gain.mod1$mean.resp/mean(decile.data$actual), 1), cex = 1)
+```
+
+# pulling data for Ravi
+```{r, message=FALSE, warning=FALSE}
+# Creating original data
+df1<-readr::read_csv('AdviseInvestData.csv')
+set.seed(101)
+row.index<-sample(row.names(df1),1000)
+data1<-df1[row.index,]
+check3<-group_by(data1, ANSWERED)
+check3<-summarise(check3, n=n())
+write_excel_csv(data1,"C:/Users/kieuk/OneDrive/Documents/BA638 Data Driven Making & Optimization/Homework/Week3/file1_historicaldata.csv")
+```
+
+```{r}
+# Creating data using predictive model
+# predict customer wil answer phone
+set.seed(100)
+new_data<-data.frame(df.valid, 'probability'=mod1.pred)
+new_data2<-filter(new_data, probability > 0.5)
+row.index2<-sample(row.names(new_data2), 1000)
+data2<-new_data2[row.index2,]
+check<-group_by(data2,ANSWERED)
+check<-summarise(check,n=n())
+# write_excel_csv(data2,"C:/Users/kieuk/OneDrive/Documents/BA638 Data Driven Making & Optimization/Homework/Week3/file2_answerphone.csv")
+```
+
+```{r}
+# preditc customer will not answer phone
+set.seed(48)
+new_data3<-filter(new_data, probability < 0.5)
+row.index3<-sample(row.names(new_data3), 1000)
+data3<-new_data3[row.index3,]
+check2<-group_by(data3, ANSWERED)
+check2<-summarise(check2, n=n())
+# write_excel_csv(data3,"C:/Users/kieuk/OneDrive/Documents/BA638 Data Driven Making & Optimization/Homework/Week3/file3_non_answerphone.csv")
+```
+
