@@ -1,6 +1,6 @@
 Staff Effeciency Scheduling
 
-Summerise case study:
+Summery of case study:
 
 AdviseInvest is a venture-backed startup with the mission of providing tools and support to help ordinary people gain control of their personal finances
 
