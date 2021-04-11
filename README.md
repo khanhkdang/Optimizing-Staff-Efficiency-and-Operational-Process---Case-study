@@ -35,5 +35,3 @@ Managing Staff Efficieny (Pdf): Details case study
 Managing Staff - Presentation (ppt)
 
 Managing Staff - Report (Word Document): Details report
-
-.
