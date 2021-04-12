@@ -1,6 +1,6 @@
 # Staff Effeciency Scheduling
 
-Summery of case study:
+Summary of case study:
 
 AdviseInvest is a venture-backed startup with the mission of providing tools and support to help ordinary people gain control of their personal finances
 
@@ -16,7 +16,7 @@ Objectives: Optimizing employee schedule, Improving customer onboard processing,
 
 Analysis of customers' demography and customers' behavior
 
-Recommendation: Staff Efficiency Scheduling basing on preditive model, Usage of Chatbots, Live Chat, Get safety certifications...
+Recommendation: Staff Efficiency Scheduling basing on predictive model, Usage of Chatbots, Live Chat, Get safety certifications...
 
 # FILES:
 
