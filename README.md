@@ -1,4 +1,4 @@
-Staff Effeciency Scheduling
+# Staff Effeciency Scheduling
 
 Summery of case study:
 
@@ -18,7 +18,7 @@ Analysis of customers' demography and customers' behavior
 
 Recommendation: Staff Efficiency Scheduling basing on preditive model, Usage of Chatbots, Live Chat, Get safety certifications...
 
-FILES:
+# FILES:
 
 Code (Jupiter Notebook): Python code for data analysis
 
